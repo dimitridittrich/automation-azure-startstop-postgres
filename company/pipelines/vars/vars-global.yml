@@ -1,0 +1,43 @@
+variables:
+  environmentType: helm_deploy
+  versioningType: SemVer
+  projectName: 'COMPANY-AUTomation-azure-startstop-postgres'
+
+  # General settings
+  WorkingDirectory: '$(System.DefaultWorkingDirectory)'
+  uniqueKey: 'COMPANY-AUTOMATION-AZURE-STARTSTOP-POSTGRES'
+  pythonVersion: '3.10'
+  RequirementsFilePath: './requirements.txt'
+  buildDockerImage: true
+
+  # SonarQube settings
+  sonarServiceConnectionName: "Company-SonarQube"
+  sonarProjectVersion: $(Build.BuildNumber)
+  sonarSourcesDir: '$(System.DefaultWorkingDirectory)'
+  sonarCoverageExclusions: '**/__init__.py,**/app.py,**/src/*'
+  sonarDuplicationExclusions: '**/__init__.py,**/app.py,**/src/*'
+  sonarExclusions: '**/__init__.py,**/app.py,**/src/*'
+
+  # name settings
+  # nameProductId: 999
+  # nameModuleId: 999
+
+  # Docker settings
+  containerRegistryConnection: 'name-registry-prod'
+  startupCommand: ddtrace-run python3 app.py
+  dockerBuildArguments: | 
+    --build-arg DOCKER_IMAGE_BASE=python:3.10-slim
+  dockerPushArguments: ' '
+  dockerfileInjection: 'EXPOSE 8080'
+  
+  copyOutputsPython: |
+    requirements.txt
+    src/**
+    default-config.ini
+    app.py
+
+  dockerImageTags: |
+    $(Build.BuildNumber)
+    $(Build.Build.SourceVersion)
+    latest
+    docker_image_base

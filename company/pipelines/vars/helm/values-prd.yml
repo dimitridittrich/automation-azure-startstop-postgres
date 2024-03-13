@@ -1,0 +1,140 @@
+# Default values for helm.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+company:
+  uniqueKey: __uniqueKey__
+
+datadog:
+  apm:
+    enabled: true
+  env: aks-name-prd-brs-001
+  service: pipeline-metrics
+  version: __version__
+  source: python
+
+replicaCount: 1
+
+nameOverride: 'pipeline-metrics'
+fullnameOverride: ''
+
+envs: 
+  ENVIRONMENT: PRD
+  DD_LOGS_ENABLED: "true"
+  DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+  DD_CONTAINER_EXCLUDE_LOGS: "name:datadog-agent"
+  DD_TRACE_DEBUG: "false"
+  TERM: "xterm"
+  
+initContainers: []
+# - name: teste-init-container
+#   args:
+#   - ls
+#   - '/flyway/sql'
+#   env:
+#   - name: FLYWAY_GROUP
+#     value: 'true'
+#   image: 'ubuntu'
+#   imagePullPolicy: Always
+#   volumeMounts: #Habilitar o volume em caso de necessidade
+#     - name: teste-migration
+#       mountPath: /flyway/sql
+
+volumes: []
+# - configMap:
+#     defaultMode: 511
+#     name: teste-migration
+#     optional: true
+#   name: teste-migration
+
+startupCommand:
+  enabled: false
+  command: []
+  args: []
+  
+image:
+  repository: __IMAGE-REPOSITORY__
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+imagePullSecrets: 
+- name: 'docker-olimpo'
+
+secret:
+  enabled: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ''
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  annotations: 
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: 'true'
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '300'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '300'
+  hosts:
+    - host: chart-example.local
+      http:
+        paths:
+          - path: /example
+            pathType: Prefix
+            backend:
+              service:
+                name: service
+                port:
+                  number: 80
+
+resources: {}
+  # We usually recommend not to specify default resource and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resource, such as Minikube. If you do want to specify resource, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resource:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector:
+  agentpool: tools
+
+tolerations: []
+
+affinity: {}

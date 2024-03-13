@@ -1,0 +1,34 @@
+variables:
+  # General settings
+  environmentName: dev
+  #containerRegistryConnection: "name-nonprod"
+  containerRegistryConnection: "name-registry-prod"
+  WorkingDirectory: "$(System.DefaultWorkingDirectory)"
+
+  #K8s
+  privateCluster: true
+  poolName: "company-azagent-pool-1-name-dev-scus-1-lx"
+  helmAksServiceConnection: "aks-name-dev-scus-001"
+  helmAzureResourceGroup: "aks-001-rg-dev-scus"
+  helmKubernetesCluster: "aks-name-dev-scus-001"
+  helmNamespace: 'pipeline-metrics'
+  helmReleaseName: 'pipe-metrics-bash-dev'
+  helmOverrideValues: >
+    image.repository=docker-nonprod.company.com.br/$(dockerImageName)
+    --set image.tag=$(Build.BuildNumber)
+    --set datadog.version=$(Build.BuildNumber)
+    --set azuretag.uniqueKey=$(uniqueKey)
+    --set secret.enabled=$(getSecrets)
+    --set envs.COMMIT=$(Build.SourceVersion)
+    --set envs.VERSION=$(Build.BuildNumber)
+
+  #KeyVault
+  getSecrets: true
+  azureSubscription: 'COMPANY-Pipeline-padrao-azurerm-COMPANY-PIPELINES'
+  keyVaultName: 'kvtpnoyhogeabdgabyqjclzy'
+  SecretsFilter: 'PIPE-METRICS-'
+  createConfigMapFile: false
+  configMapScriptsPath: ''
+
+  #Apim
+  apimEnabled: false

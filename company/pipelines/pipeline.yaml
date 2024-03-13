@@ -1,0 +1,67 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - CHANGELOG.md
+pr:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - CHANGELOG.md
+
+variables:
+  - template: vars/vars-global.yml
+
+resources:
+  repositories:
+    - repository: blueprints
+      type: git
+      name: COMPANY-PIPELINES/_git/PIPELINE-BLUEPRINTS
+      ref: refs/tags/3.3.1
+
+    - repository: templates
+      type: git
+      name: COMPANY-PIPELINES/_git/PIPELINE-TEMPLATES
+      ref: refs/tags/3.10.0
+
+pool:
+  vmImage: 'ubuntu-20.04'
+
+stages:
+  - template: python/pipeline-ci.yaml@blueprints
+    parameters:
+      pythonVersion: ${{ variables.pythonVersion }}
+      RequirementsFilePath: ${{ variables.RequirementsFilePath }}
+      WorkingDirectory: ${{ variables.WorkingDirectory }}
+      sonarServiceConnectionName: ${{ variables.sonarServiceConnectionName }}
+      sonarProjectVersion: ${{ variables.releaseVersion }}
+      sonarCoverageExclusions: ${{ variables.sonarCoverageExclusions }}
+      sonarDuplicationExclusions: ${{ variables.sonarDuplicationExclusions }}
+      sonarExclusions: ${{ variables.sonarExclusions }}
+      uniqueKey: ${{ variables.uniqueKey }}
+      containerRegistryConnection: ${{ variables.containerRegistryConnection }}
+      projectName: ${{ variables.projectName }}
+      copyOutputsPython: ${{ variables.copyOutputsPython }}
+      dockerfileInjection: ${{ variables.dockerfileInjection }}
+      buildDockerImage: ${{ variables.buildDockerImage }}
+      dockerImageTags: ${{ variables.dockerImageTags }}
+      dockerBuildArguments: ${{ variables.dockerBuildArguments }}
+      startupCommand: ${{ variables.startupCommand }}
+
+  - stage: publish_image
+    displayName: Publish image
+    dependsOn: packing
+    jobs:
+      - job:
+        steps:
+          - template: generic/step/versioning/docker_promotion.yml@templates
+            parameters:
+              imageTags: ${{ variables.dockerImageTags }}
+              containerRegistryConnection: ${{ variables.containerRegistryConnection }}
+              uniqueKey: ${{ variables.uniqueKey }}
+              containerRegistryName: docker.company.com.br

@@ -1,0 +1,34 @@
+variables:
+  environmentName: stg
+  poolname: "company-azagent-pool-1-name-stg-brs-2-lx"
+
+  #name
+  #containerRegistryConnection: "name-registry"
+  containerRegistryConnection: "name-registry-prod"
+
+  #K8s
+  privateCluster: true
+  helmAksServiceConnection: 'name-stg-brs-aks-001'
+  helmAzureResourceGroup: 'aks-001-rg-stg-brs'
+  helmKubernetesCluster: 'name-stg-brs-aks-001'
+  helmNamespace: 'pipeline-metrics'
+  helmReleaseName: 'pipe-metrics-bash-stg'
+  helmOverrideValues: >
+    image.repository=docker-nonprod.company.com.br/$(dockerImageName)
+    --set image.tag=$(Build.BuildNumber)
+    --set datadog.version=$(Build.BuildNumber)
+    --set azuretag.uniqueKey=$(uniqueKey)
+    --set secret.enabled=$(getSecrets)
+    --set envs.COMMIT=$(Build.SourceVersion)
+    --set envs.VERSION=$(Build.BuildNumber)
+
+  #KeyVault
+  getSecrets: true
+  azureSubscription: 'COMPANY-Pipeline-padrao-azurerm-COMPANY-PIPELINES'
+  keyVaultName: 'kvxyesizprqhkxklplvagajf'
+  SecretsFilter: 'PIPE-METRICS-'
+  createConfigMapFile: false
+  configMapScriptsPath: ''
+
+  #Apim
+  apimEnabled: false
