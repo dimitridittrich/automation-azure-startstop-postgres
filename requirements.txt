@@ -1,0 +1,9 @@
+requests
+azure.identity
+azure.mgmt.rdbms
+azure-mgmt-compute
+azure-mgmt-resource
+python-json-logger~=2.0.7
+azure-keyvault~=4.2.0
+pytest
+freezegun
